@@ -9,7 +9,23 @@ const SUBJECTS = [
   "Science", 
   "History", 
   "English", 
-  "Computer Science"
+  "Computer Science",
+  "Chemistry",
+  "Physics",
+  "Biology",
+  "Artifical Intillegence",
+  "Machine Learning",
+  "Data Science",
+  "Tableau",
+  "Power BI",
+  "Excel",
+  "Python",
+  "C/C++/C#",
+  "HTML/CSS/JS",
+  "React/Next.js",
+  "Java",
+  "SQL",
+  "Other"
 ];
 
 export default function UploadPage() {
@@ -18,6 +34,7 @@ export default function UploadPage() {
     title: "",
     description: "",
   });
+  const [customSubject, setCustomSubject] = useState('');
   const [file, setFile] = useState(null);
   
   // Status states
@@ -53,6 +70,13 @@ export default function UploadPage() {
       return;
     }
 
+    if (formData.subject === 'Other' && !customSubject.trim()) {
+      setErrorMsg("Please enter a subject name");
+      return;
+    }
+
+    const finalSubject = formData.subject === 'Other' ? customSubject : formData.subject;
+
     setIsUploading(true);
 
     try {
@@ -60,7 +84,7 @@ export default function UploadPage() {
       const fileExt = file.name.split('.').pop();
       // Generate a unique filename using timestamp and random string to avoid collisions
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `${formData.subject.replace(/\s+/g, '-')}/${fileName}`;
+      const filePath = `${finalSubject.replace(/\s+/g, '-')}/${fileName}`;
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('notes-files')
@@ -81,7 +105,7 @@ export default function UploadPage() {
       const { error: insertError } = await supabase
         .from('notes')
         .insert([{
-          subject: formData.subject,
+          subject: finalSubject,
           title: formData.title,
           description: formData.description,
           file_url: fileUrl
@@ -98,6 +122,7 @@ export default function UploadPage() {
         title: "",
         description: "",
       });
+      setCustomSubject('');
       setFile(null);
       const fileInput = document.getElementById('file-upload');
       if (fileInput) fileInput.value = '';
@@ -199,6 +224,17 @@ export default function UploadPage() {
                     <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                   </div>
                 </div>
+                {formData.subject === 'Other' && (
+                  <div className="mt-4">
+                    <input
+                      type="text"
+                      placeholder="Type your subject name..."
+                      value={customSubject}
+                      onChange={(e) => setCustomSubject(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Title Input */}
